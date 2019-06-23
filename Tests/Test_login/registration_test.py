@@ -1,50 +1,56 @@
+import time
+import unittest
+import allure
+from allure_commons.types import Severity
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
-import time
-import requests
-import random
-import allure
+from Tests.Generation_email import Email
+from Tests.Pages.PageRegistr import PageRegistr
+from Tests.Pages.PageStart import PageStart
 
-word_site = "http://svnweb.freebsd.org/csrg/share/dict/words?view=co&content-type=text/plain"
-response = requests.get(word_site)
-WORDS = response.content.splitlines()
-word1 = str(random.choice(WORDS))
-word2 = str(random.choice(WORDS))
-email = word1 + word2 + "@gmail.com"
 
-driver = webdriver.Chrome(executable_path="C:/Users/dudon/selenium/chromedriver.exe")
-driver.implicitly_wait(10)
-driver.maximize_window()
+@allure.title ("Проверка регистрации новых пользователей")
+@allure.severity(Severity.BLOCKER)
+class RegistrationTest(unittest.TestCase):
 
-driver.get("http://automationpractice.com/index.php")
 
-driver.find_element_by_link_text("Sign in").click()
-time.sleep(2)
-driver.find_element_by_id("email_create").send_keys(email)
-driver.find_element_by_id("SubmitCreate").click()
-WebDriverWait(driver, 5, 0.5)
-driver.find_element_by_id("id_gender1").click()
-driver.find_element_by_id("customer_firstname").send_keys("Valentin")
-driver.find_element_by_id("customer_lastname").send_keys("Dudkevich")
-driver.find_element_by_id("email").click()
-driver.find_element_by_id("passwd").send_keys("V1234567")
-driver.find_element_by_id("days").send_keys(u'\ue00f')
-driver.find_element_by_id("days").click()
-driver.find_element_by_id("months").send_keys(u'\ue00f')
-driver.find_element_by_id("months").click()
-driver.find_element_by_id("years").send_keys(u'\ue00f')
-driver.find_element_by_id("years").click()
-driver.find_element_by_id("company").send_keys("Mainsoft")
-driver.find_element_by_id("address1").send_keys("St. Pol, 123")
-driver.find_element_by_id("city").send_keys("Vitebsk")
-driver.find_element_by_id("id_state").click()
-time.sleep(2)
-driver.find_element_by_id("id_state").send_keys(u'\ue00f')
-driver.find_element_by_id("id_state").click()
-driver.find_element_by_id("postcode").send_keys("12345")
-driver.find_element_by_id("phone_mobile").send_keys("375298187090")
-driver.find_element_by_id("submitAccount").click()
-time.sleep(1)
-driver.close()
-driver.quit()
-print("Test Completed")
+    @classmethod
+    def setUpClass(cls):
+        cls.driver = webdriver.Chrome(executable_path="C:/Users/dudon/selenium/chromedriver.exe")
+        cls.driver.implicitly_wait(10)
+        cls.driver.maximize_window()
+
+    def test_registration_valid(self):
+        driver = self.driver
+        driver.get("http://automationpractice.com/index.php")
+        sign = PageStart(driver)
+
+        sign.Sign_in()
+        WebDriverWait(driver, 40, 0.5)
+        sign.Start_reg(Email())
+        WebDriverWait(driver, 10, 0.5)
+        sign.Start_reg1()
+        WebDriverWait(driver, 10, 0.5)
+
+        reg = PageRegistr(driver)
+        WebDriverWait(driver, 10, 0.5)
+        reg.gender()
+        reg.firstname("Valentin")
+        reg.lastname("Dudkevich")
+        reg.passw("V1234567")
+        reg.day(u'\ue00f')
+        reg.month(u'\ue00f')
+        reg.year(u'\ue00f')
+        reg.company("Mainsoft")
+        reg.address("St. Pol, 123")
+        reg.city("Vitebsk")
+        reg.state(u'\ue00f')
+        reg.postcode("12346")
+        reg.mobile("375298187090")
+        time.sleep(1)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.driver.close()
+        cls.driver.quit()
+        print("Test Completed")
